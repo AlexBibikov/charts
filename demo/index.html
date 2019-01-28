@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#000000">
+    <title>Test Charts</title>
+    <style>
+      .chart-funnel-item text {
+        font-family: 'helvetica';
+        font-weight: 500;
+        font-size: 0.6em;
+        opacity: 0.4;
+        transition: .4s;
+      }
+      .chart-funnel-item:hover text {
+        opacity: 1.0;
+      }
+
+      .chart-funnel-item {
+        transition: .4s;
+      }
+      .panel-right {
+        float: right;
+        height: 100%;
+        width: 30%;
+      }
+
+      .panel-right input {
+        width: 90%
+      }
+
+      .panel-left  {
+        float: left;
+        height: 100%;
+        width: 70%;
+      }
+    </style>
+    <style id="hover-style">
+      .chart-funnel-item:hover { transform: translateX(-2.5%) scaleX(1.05) scaleY(1.025); }
+    </style>
+  </head>
+  <body>
+    <noscript>
+      You need to enable JavaScript to run this app.
+    </noscript>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.0.0-beta.2/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.7.0-alpha.2/umd/react.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.7.0-alpha.2/umd/react-dom.development.js"></script>
+    <script src="chart.js"></script>
+    <div id="root"></div>
+    <script type="text/babel">
+
+      let nouns = ['area','book','business','case','child','company','country','day','fact','family','government','group','hand','home','job','life','lot','money','month','mother','night','number','part','people','place','point','problem','program','question','right','room','school','state','story','student','study','system','thing','time','water','way','week','woman','word','work','world','year'];
+      const randomNoun = () => {
+          return nouns.splice(Math.floor(Math.random()*nouns.length), 1)[0];
+      }
+      const data = new Array(4+Math.floor(Math.random()*6)).fill(0).map(v => {
+        return {name: randomNoun(), value:10 + Math.random()*500}
+      });
+
+      const controls = [ // name, min,  max, step, label
+        ['gap', 0, 40, 1, 'Gap between elements'],
+        ['ry',  0, 0.1, 0.001, 'Tilt'],
+        ['hoverShift', 0, 100, 0.1, 'Hover movement % from element width'],
+        ['luminosityThreshold', 0, 1, 0.1, 'Element luminosity point when label color switches from white to black']
+      ]
+
+      const props = {
+        width:500,
+        height:300,
+        data:data,
+        label:true,
+        valueFormat:'.2s',
+        extractValue:(d=>d.value),
+        extractLabel:(d=>d.name),
+        minItemWidth:10,
+        margins:{top:10,bottom:10,left:10,right:10},
+        gap:0,
+        ry:0.02,
+        hoverShift:5,
+        luminosityThreshold:0.4
+      }
+
+      class App extends React.Component {
+
+        handleControl = (e) => {
+          const t = e.nativeEvent.target;
+          //console.log(t.name, ':', t.value);
+          props[t.name] = +t.value;
+          if(t.name === 'hoverShift') {
+            const style = document.getElementById('hover-style');
+            const v = props[t.name];
+            style.innerText = `.chart-funnel-item:hover { transform: translateX(-${v/2}%) scaleX(${1+v/100}) scaleY(${1+v/300}); }`
+          }
+          this.forceUpdate();
+        }
+        
+        render() {
+          return <div className="container">
+          <div className="panel-left">
+            <Charts.FunnelChart {...props} />
+          </div>
+          <div className="panel-right">
+            {controls.map((c, i) => (<div key={`key-${i}`}>
+              <datalist id={`tickmarks-${i}`}>
+                {(new Array(10).fill(0).map((v, j) => (
+                  <option key={`key-${i}-${j}`} value={j*(c[2]-c[1])/10} />
+                )))}
+              </datalist>
+              <input
+                type="range" 
+                id={c[0]} name={c[0]} 
+                min={c[1]} max={c[2]}
+                step={c[3]}
+                defaultValue={props[c[0]]}
+                list={`tickmarks-${i}`}
+                onChange={this.handleControl}/><br/><label htmlFor={c[0]}>{c[4]}</label><hr/>
+            </div>))}
+          </div>
+        </div>
+        }
+      }
+
+      ReactDOM.render(
+        <App {...props}/>,
+        document.getElementById('root')
+      )
+    </script>
+  </body>
+
+</html>
