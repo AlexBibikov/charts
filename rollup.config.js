@@ -11,7 +11,9 @@ export default  {
   input: "src/index.js",
   output: {
     file: outputFile,
-    format: "cjs"
+    format: "iife",
+    sourceMap: 'inline',
+    name: 'Charts'
   },
   plugins: [
     replace({
@@ -20,7 +22,11 @@ export default  {
     babel({
       exclude: "node_modules/**"
     }),
-    resolve(),
+    resolve({
+      jsnext: true,
+      main: true,
+      browser: true,
+    }),
     commonjs(),
     (NODE_ENV === "production") && uglify({
         compress: {

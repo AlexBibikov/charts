@@ -1,8 +1,8 @@
 {
   "name": "charts",
   "version": "0.1.0",
-  "description": "Nnice React charts.",
-  "license": "BSD-3-Clause",
+  "description": "Nice React charts.",
+  "license": "MIT",
   "keywords": [
     "charts",
     "funnel",
@@ -15,7 +15,7 @@
     "d3-scale": "^2.1.2",
     "d3-scale-chromatic": "^1.3.3"
   },
-  "main": "lib /dev.js",
+  "main": "lib /chart.js",
   "unpkg": "lib/chart.min.js",
   "jsdelivr": "lib/charts.min.js",
   "module": "src/index.js",
@@ -24,14 +24,17 @@
     "url": "https://github.com/alexbib/charts.git"
   },
   "scripts": {
-    "prepublishOnly": "npm run release",
     "release": "npm run build:dev && npm run build:prod",
     "build:prod": "NODE_ENV=production rollup -c",
-    "build:dev": "NODE_ENV=development rollup -c"
+    "build:dev": "NODE_ENV=development rollup -c",
+    "release:win": "npm run build:dev:win && npm run build:prod:win",
+    "build:prod:win": "SET NODE_ENV=production && rollup -c",
+    "build:dev:win": "SET NODE_ENV=development && rollup -c"
   },
   "devDependencies": {
     "@babel/core": "^7.1.0",
     "@babel/helper-module-imports": "^7.0.0",
+    "@babel/plugin-external-helpers": "^7.2.0",
     "@babel/plugin-proposal-class-properties": "^7.1.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
     "@babel/plugin-transform-runtime": "^7.1.0",

@@ -13,14 +13,15 @@ export const FunnelChart = ({
                                 data=[], 
                                 extractValue=(d=>d.value), 
                                 extractLabel=(d=>d.name), 
-                                label,
+                                label=true,
                                 valueFormat='.2s',
                                 colorScale=scaleOrdinal(schemePaired),
                                 minItemWidth=10, 
                                 margins={top:10,bottom:10,left:10,right:10},
                                 gap=4,
                                 ry=0.02,
-                                hoverShift=5
+                                hoverShift=5,
+                                luminosityThreshold=0.4
                             }) => {
 
     const [hover, setHover] = useState(null);
@@ -47,20 +48,17 @@ export const FunnelChart = ({
                 height: ih, 
                 width: iw, 
                 color: cc,
-                textColor: new Color(cc).luminosity() > 0.5 ? '#000000' : '#FFFFFF',
+                textColor: new Color(cc).luminosity() > luminosityThreshold ? '#000000' : '#FFFFFF',
                 item};
         });
     }
     const d = prepareData(data.sort((a, b) => (a.value - b.value)));
 
-    const topY = (item) => (item.y+(hover === item.item.name?hoverShift:0));
-
     const renderLabel = (item, i) => {
         if(typeof label === 'boolean' && label) {
-    // stroke={new Color(item.textColor).negate()} strokeWidth={1}
             const sc = new Color(item.textColor).negate();
             const scale = scaleLinear().domain([20, 500]).range([20, 24]);
-            return (<text x={item.x+item.width/2} y={topY(item)+item.height/2+item.width*ry} 
+            return (<text x={item.x+item.width/2} y={item.y+item.height/2+item.width*ry} 
                 fill={item.textColor} 
                 stroke={'none'} strokeWidth={0}
                 fontWeight={900}
@@ -81,7 +79,7 @@ export const FunnelChart = ({
         if(typeof label === 'string') {
             return (<text x={item.x+item.width/2} y={item.y+item.height/2} 
                 fill={item.textColor} dominantBaseline="middle"
-                textAnchor="middle">label</text>);
+                textAnchor="middle">{label}</text>);
         }
         else {
             return null;
@@ -94,10 +92,10 @@ export const FunnelChart = ({
 
     const renderItem = (item, i, a) => {
         const d = [
-            item.x, topY(item),
-            item.x+item.width, topY(item),
-            Math.floor((w+bottomW)/2), item.height-gap+topY(item),
-            Math.floor((w-bottomW)/2), item.height-gap+topY(item)
+            item.x, item.y,
+            item.x+item.width, item.y,
+            Math.floor((w+bottomW)/2), item.height-gap+item.y,
+            Math.floor((w-bottomW)/2), item.height-gap+item.y
         ];
         const points = `M${d[0]},${d[1]} L${d[2]},${d[3]} `+ 
         `Q${Math.floor((d[2]+2*d[4])/3)},${Math.floor((d[5]+d[3])/2)},${d[4]},${d[5]} `+
@@ -107,7 +105,7 @@ export const FunnelChart = ({
         //console.log(points);
         bottomW = item.width;
 
-        return <g key={`p-${i}`} 
+        return <g className="chart-funnel-item" key={`p-${i}`} 
             stroke='black' 
             strokeWidth={0.14} 
             onMouseEnter={() => {setHover(item.item.name)}}  
@@ -116,7 +114,7 @@ export const FunnelChart = ({
 
             <ellipse 
                 cx={Math.floor(w/2)} 
-                cy={topY(item)} 
+                cy={item.y} 
                 rx={(d[2]-d[0])/2} 
                 ry={item.width*ry} 
                 fill={colors[item.item.name]} />
@@ -146,7 +144,7 @@ export const FunnelChart = ({
         <defs>
             {d.map(gradientItem)}
         </defs>
-        <g transform={`translate(${margins.left},${margins.top})`}>
+        <g className="chart-funnel" transform={`translate(${margins.left},${margins.top})`}>
             {d.map(renderItem)}
         </g>
     </svg>
